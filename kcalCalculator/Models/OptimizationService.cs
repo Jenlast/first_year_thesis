@@ -60,22 +60,55 @@ namespace kcalCalculator.Models
                 if (resultStatus == Solver.ResultStatus.OPTIMAL)
                 {
                     StringBuilder sb = new StringBuilder();
-                    sb.AppendLine("УСПІХ! Знайдено оптимальний кошик:\n");
+                    sb.AppendLine("🛍️ Сформований кошик:\n");
+                    sb.AppendLine("Включає такі продукти:");
                     
                     double totalCost = 0;
+                    double totalCalories = 0;
+                    double totalProteins = 0;
+                    double totalFats = 0;
+                    double totalCarbs = 0;
                     
                     foreach (var product in products)
                     {
                         double quantity = variables[product].SolutionValue();
-                        if (quantity > 0.01) // Виводимо лише те, що потрібно купити
+                        if (quantity > 0.01) // Якщо продукт обрано (більше нуля)
                         {
-                            sb.AppendLine($"- {product.Name}: {Math.Round(quantity, 2)} од.");
+                            // Рахуємо сумарні показники
                             totalCost += quantity * product.Price;
+                            totalCalories += quantity * product.Calories;
+                            totalProteins += quantity * product.Proteins;
+                            totalFats += quantity * product.Fats;
+                            totalCarbs += quantity * product.Carbs;
+
+                            // Логіка відображення: якщо це ваговий продукт (розрахунок на 100г),
+                            // множимо на 100, щоб показати грами. Інакше - штуки.
+                            double displayQuantity = quantity;
+                            string unit = "од/тижд";
+
+                            if (product is WeightProduct)
+                            {
+                                displayQuantity = quantity * 100;
+                                unit = "г/тижд";
+                            }
+                            else if (product is UnitProduct)
+                            {
+                                unit = "шт/тижд";
+                            }
+
+                            // Додаємо рядок продукту
+                            sb.AppendLine($"- {product.Name} — {Math.Round(displayQuantity, 0)} {unit}");
                         }
                     }
                     
-                    sb.AppendLine($"\nЗагальна калорійність: {Math.Round(solver.Objective().Value(), 2)} ккал");
-                    sb.AppendLine($"Загальна вартість: {Math.Round(totalCost, 2)} грн");
+                    sb.AppendLine("\n📊 Загальні показники на тиждень:");
+                    sb.AppendLine($"- Калорій: {Math.Round(totalCalories, 1)} ккал");
+                    sb.AppendLine($"- Білків: {Math.Round(totalProteins, 1)} г");
+                    sb.AppendLine($"- Жирів: {Math.Round(totalFats, 1)} г");
+                    sb.AppendLine($"- Вуглеводів: {Math.Round(totalCarbs, 1)} г");
+
+                    sb.AppendLine($"\n💵 Загальна ціна: {Math.Round(totalCost, 2)} грн.");
+
                     return sb.ToString();
                 }
                 else
