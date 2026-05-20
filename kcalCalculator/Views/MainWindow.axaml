@@ -10,6 +10,10 @@
         Title="Калькулятор Оптимального Кошика"
         Width="1500" Height="900">
 
+    <Window.KeyBindings>
+        <KeyBinding Gesture="Enter" Command="{Binding CalculateBasketCommand}"/>  
+    </Window.KeyBindings>
+
     <Grid ColumnDefinitions="2*, 1*">
         <!-- ЛІВА ЧАСТИНА: Таблиця продуктів -->
         <DockPanel Grid.Column="0" Margin="10">

@@ -7,41 +7,61 @@ namespace kcalCalculator.Models
 {
     public class OptimizationService
     {
-        // Метод повертає рядок з результатом (або повідомленням про помилку)
         public string CalculateOptimalBasket(IEnumerable<BaseProduct> products, ConstraintsContext constraints)
         {
             try
             {
-                // Створюємо солвер для лінійного програмування (GLOP)
+                // ==========================================
+                // 1. БЛОК ВАЛІДАЦІЇ ДАНИХ (Перевірка на мінуси)
+                // ==========================================
+                
+                // Перевіряємо вимоги (праву панель)
+                if (constraints.MaxBudget < 0 || constraints.MinProteins < 0 || constraints.MaxProteins < 0 || 
+                    constraints.MinFats < 0 || constraints.MaxFats < 0 || constraints.MinCarbs < 0 || constraints.MaxCarbs < 0)
+                {
+                    return "❌ ПОМИЛКА: Вимоги до кошика не можуть бути від'ємними!";
+                }
+
+                // Перевіряємо продукти (таблицю)
+                foreach (var p in products)
+                {
+                    if (p.Price < 0 || p.Calories < 0 || p.Proteins < 0 || p.Fats < 0 || p.Carbs < 0 || p.MinQuantity < 0 || p.MaxQuantity < 0)
+                    {
+                        return $"❌ ПОМИЛКА: Продукт '{p.Name}' містить від'ємні значення! Вартість, вага та БЖВ не можуть бути меншими за нуль.";
+                    }
+                    
+                    // Бонус: перевірка, щоб мінімум не був більшим за максимум
+                    if (p.MinQuantity > p.MaxQuantity)
+                    {
+                        return $"❌ ПОМИЛКА: У продукту '{p.Name}' мінімальна кількість більша за максимальну!";
+                    }
+                }
+
+                // ==========================================
+                // 2. БЛОК РОЗРАХУНКУ (Лінійне програмування)
+                // ==========================================
+                
                 Solver solver = Solver.CreateSolver("GLOP");
                 if (solver == null) return "Помилка ініціалізації розв'язувача.";
 
-                // Словник для зберігання змінних (x_i - кількість кожного продукту)
                 var variables = new Dictionary<BaseProduct, Variable>();
-
-                // Цільова функція: Мінімізація калорій (Вимога 1)
                 Objective objective = solver.Objective();
                 objective.SetMinimization();
 
-                // 1. Створення змінних та базових обмежень (Вимога 2а - мінімум/максимум продукту)
+                // ... ТУТ ЙДЕ ВЕСЬ ВАШ ПОПЕРЕДНІЙ КОД СТВОРЕННЯ ЗМІННИХ ...
                 foreach (var product in products)
                 {
-                    // Змінна x >= MinQuantity та x <= MaxQuantity
                     Variable x = solver.MakeNumVar(product.MinQuantity, product.MaxQuantity, product.Name);
                     variables.Add(product, x);
-
-                    // Додаємо калорійність цього продукту до цільової функції: x * Calories
                     objective.SetCoefficient(x, product.Calories);
                 }
 
-                // 2. Обмеження бюджету: Сума (x_i * Price_i) <= MaxBudget (Вимога 2б)
                 Constraint budgetConstraint = solver.MakeConstraint(0, constraints.MaxBudget, "Budget");
                 foreach (var product in products)
                 {
                     budgetConstraint.SetCoefficient(variables[product], product.Price);
                 }
 
-                // 3. Макроелементи (Білки, Жири, Вуглеводи) (Вимога 2в)
                 Constraint proteinConstraint = solver.MakeConstraint(constraints.MinProteins, constraints.MaxProteins, "Proteins");
                 Constraint fatConstraint = solver.MakeConstraint(constraints.MinFats, constraints.MaxFats, "Fats");
                 Constraint carbConstraint = solver.MakeConstraint(constraints.MinCarbs, constraints.MaxCarbs, "Carbs");
@@ -53,10 +73,9 @@ namespace kcalCalculator.Models
                     carbConstraint.SetCoefficient(variables[product], product.Carbs);
                 }
 
-                // РОЗВ'ЯЗАННЯ
                 Solver.ResultStatus resultStatus = solver.Solve();
 
-                // Формування результату
+                // ... ТУТ ЙДЕ ВАШ ОНОВЛЕНИЙ БЛОК ВИВОДУ РЕЗУЛЬТАТУ ...
                 if (resultStatus == Solver.ResultStatus.OPTIMAL)
                 {
                     StringBuilder sb = new StringBuilder();
@@ -72,17 +91,14 @@ namespace kcalCalculator.Models
                     foreach (var product in products)
                     {
                         double quantity = variables[product].SolutionValue();
-                        if (quantity > 0.01) // Якщо продукт обрано (більше нуля)
+                        if (quantity > 0.01)
                         {
-                            // Рахуємо сумарні показники
                             totalCost += quantity * product.Price;
                             totalCalories += quantity * product.Calories;
                             totalProteins += quantity * product.Proteins;
                             totalFats += quantity * product.Fats;
                             totalCarbs += quantity * product.Carbs;
 
-                            // Логіка відображення: якщо це ваговий продукт (розрахунок на 100г),
-                            // множимо на 100, щоб показати грами. Інакше - штуки.
                             double displayQuantity = quantity;
                             string unit = "од/тижд";
 
@@ -96,7 +112,6 @@ namespace kcalCalculator.Models
                                 unit = "шт/тижд";
                             }
 
-                            // Додаємо рядок продукту
                             sb.AppendLine($"- {product.Name} — {Math.Round(displayQuantity, 0)} {unit}");
                         }
                     }
@@ -118,7 +133,6 @@ namespace kcalCalculator.Models
             }
             catch (Exception ex)
             {
-                // Вимога методички: Використання механізму виключень
                 return $"Критична помилка розрахунку: {ex.Message}";
             }
         }

@@ -1,13 +1,35 @@
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
+
 namespace kcalCalculator.Models
 {
-    public class ConstraintsContext
+    public class ConstraintsContext : INotifyPropertyChanged
     {
-        public double MaxBudget { get; set; } // Обмеження вартості
-        public double MinProteins { get; set; }
-        public double MaxProteins { get; set; }
-        public double MinFats { get; set; }
-        public double MaxFats { get; set; }
-        public double MinCarbs { get; set; }
-        public double MaxCarbs { get; set; }
+        private double _maxBudget;
+        public double MaxBudget { get => _maxBudget; set { _maxBudget = value; OnPropertyChanged(); } }
+
+        private double _minProteins;
+        public double MinProteins { get => _minProteins; set { _minProteins = value; OnPropertyChanged(); } }
+
+        private double _maxProteins;
+        public double MaxProteins { get => _maxProteins; set { _maxProteins = value; OnPropertyChanged(); } }
+
+        private double _minFats;
+        public double MinFats { get => _minFats; set { _minFats = value; OnPropertyChanged(); } }
+
+        private double _maxFats;
+        public double MaxFats { get => _maxFats; set { _maxFats = value; OnPropertyChanged(); } }
+
+        private double _minCarbs;
+        public double MinCarbs { get => _minCarbs; set { _minCarbs = value; OnPropertyChanged(); } }
+
+        private double _maxCarbs;
+        public double MaxCarbs { get => _maxCarbs; set { _maxCarbs = value; OnPropertyChanged(); } }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
     }
 }
