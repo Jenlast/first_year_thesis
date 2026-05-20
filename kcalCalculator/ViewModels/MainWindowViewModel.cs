@@ -111,8 +111,9 @@ namespace kcalCalculator.ViewModels
         {
             if (SelectedProduct != null)
             {
+                string deletedProductcName = SelectedProduct.Name;
                 Products.Remove(SelectedProduct);
-                CalculationResult = $"Продукт '{SelectedProduct.Name}' видалено.";
+                CalculationResult = $"Продукт '{deletedProductcName}' видалено.";
             }
             else
             {
