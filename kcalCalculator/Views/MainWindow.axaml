@@ -8,7 +8,7 @@
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
         Title="Калькулятор Оптимального Кошика"
-        Width="1100" Height="650">
+        Width="1200" Height="650">
 
     <Grid ColumnDefinitions="2*, 1*">
         <!-- ЛІВА ЧАСТИНА: Таблиця продуктів -->
