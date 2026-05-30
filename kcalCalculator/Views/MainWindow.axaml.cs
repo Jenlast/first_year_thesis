@@ -2,7 +2,6 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using kcalCalculator.ViewModels;
-using System.Linq;
 
 namespace kcalCalculator.Views
 {
@@ -13,10 +12,16 @@ namespace kcalCalculator.Views
             InitializeComponent();
         }
 
+        private async void OnAboutMenuClick(object? sender, RoutedEventArgs e)
+        {
+            var aboutWindow = new AboutWindow();
+            await aboutWindow.ShowDialog(this);
+        }
+
         private async void OnOpenMenuClick(object? sender, RoutedEventArgs e)
         {
             var topLevel = TopLevel.GetTopLevel(this);
-            if (topLevel == null) return; // ЗАХИСТ ВІД NULL
+            if (topLevel == null) return;
 
             var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
             {
@@ -38,7 +43,7 @@ namespace kcalCalculator.Views
         private async void OnSaveAsMenuClick(object? sender, RoutedEventArgs e)
         {
             var topLevel = TopLevel.GetTopLevel(this);
-            if (topLevel == null) return; // ЗАХИСТ ВІД NULL
+            if (topLevel == null) return;
 
             var file = await topLevel.StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
             {

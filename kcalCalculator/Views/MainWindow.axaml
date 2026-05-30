@@ -6,9 +6,9 @@
         mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="600"
         x:Class="kcalCalculator.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
-        Icon="/Assets/avalonia-logo.ico"
+        Icon="/Assets/icons8-корзина-64.png"
         Title="Калькулятор Оптимального Кошика"
-        Width="1200" Height="650">
+        Width="1550" Height="650">
 
     <DockPanel>
         
@@ -21,7 +21,7 @@
                 <MenuItem Header="Вихід" Command="{Binding ExitCommand}"/>
             </MenuItem>
             <MenuItem Header="Довідка">
-                <MenuItem Header="Про застосунок" />
+                <MenuItem Header="Про застосунок" Click="OnAboutMenuClick" />
             </MenuItem>
         </Menu>
 
