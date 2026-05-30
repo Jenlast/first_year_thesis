@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using kcalCalculator.Models;
@@ -12,42 +13,51 @@ namespace kcalCalculator.ViewModels
         private readonly DataManager _dataManager;
         private readonly OptimizationService _optimizationService;
 
-        // Список продуктів для DataGrid
+        // Повний список продуктів (база)
         public ObservableCollection<BaseProduct> Products { get; set; }
         
-        // Обмеження користувача
+        public ObservableCollection<BaseProduct> FilteredProducts { get; set; }
+
         public ConstraintsContext UserConstraints { get; set; }
 
-        // Результат розрахунку
         private string _calculationResult = "Тут буде результат...";
         public string CalculationResult
         {
             get => _calculationResult;
-            set
-            {
-                _calculationResult = value;
-                OnPropertyChanged();
+            set { _calculationResult = value; OnPropertyChanged(); }
+        }
+
+        private string _statusMessage;
+        public string StatusMessage
+        {
+            get => _statusMessage;
+            set { _statusMessage = value; OnPropertyChanged(); }
+        }
+
+        private string _searchText = "";
+        public string SearchText
+        {
+            get => _searchText;
+            set 
+            { 
+                _searchText = value; 
+                OnPropertyChanged(); 
+                ApplyFilter(); // Одразу фільтруємо таблицю при введенні тексту
             }
         }
 
-        // Команди для кнопок
-        public ICommand CalculateBasketCommand { get; }
-        public ICommand SaveCommand { get; }
-        public ICommand AddProductCommand { get; }
-        // Команда для видалення
-        public ICommand DeleteProductCommand { get; }
-
-        // Властивість для збереження виділеного продукту в таблиці
         private BaseProduct _selectedProduct;
         public BaseProduct SelectedProduct
         {
             get => _selectedProduct;
-            set
-            {
-                _selectedProduct = value;
-                OnPropertyChanged();
-            }
+            set { _selectedProduct = value; OnPropertyChanged(); }
         }
+
+        public ICommand CalculateBasketCommand { get; }
+        public ICommand SaveCommand { get; }
+        public ICommand AddProductCommand { get; }
+        public ICommand DeleteProductCommand { get; }
+        public ICommand ExitCommand { get; } 
 
         public MainWindowViewModel()
         {
@@ -59,66 +69,93 @@ namespace kcalCalculator.ViewModels
 
             if (Products.Count == 0)
             {
-                Products.Add(new WeightProduct { Name = "Гречка", Price = 40, Calories = 330, Proteins = 12.6, Fats = 3.3, Carbs = 57.1, MinQuantity = 0, MaxQuantity = 10 });
-                Products.Add(new WeightProduct { Name = "Куряче філе", Price = 150, Calories = 110, Proteins = 23, Fats = 1.2, Carbs = 0, MinQuantity = 0, MaxQuantity = 5 });
-                Products.Add(new WeightProduct { Name = "Яйця (1шт)", Price = 6, Calories = 78, Proteins = 6, Fats = 5, Carbs = 0.6, MinQuantity = 0, MaxQuantity = 30 });
+                Products.Add(new WeightProduct { Name = "Гречка", Price = 7.5, Calories = 330, Proteins = 12.6, Fats = 3.3, Carbs = 62, MinQuantity = 10, MaxQuantity = 50 });
+                Products.Add(new WeightProduct { Name = "Куряче філе", Price = 21.5, Calories = 110, Proteins = 23, Fats = 1.5, Carbs = 0, MinQuantity = 10, MaxQuantity = 40 });
+                Products.Add(new WeightProduct { Name = "Яйця (1шт)", Price = 5.4, Calories = 75, Proteins = 6, Fats = 5, Carbs = 0.5, MinQuantity = 15, MaxQuantity = 40 });
             }
+
+            // Ініціалізуємо відфільтрований список
+            FilteredProducts = new ObservableCollection<BaseProduct>(Products);
 
             UserConstraints = new ConstraintsContext
             {
-                MaxBudget = 500,
-                MinProteins = 50, MaxProteins = 150,
-                MinFats = 40, MaxFats = 80,
-                MinCarbs = 150, MaxCarbs = 300
+                MaxBudget = 10000,
+                MinProteins = 900, MaxProteins = 1960,
+                MinFats = 300, MaxFats = 980,
+                MinCarbs = 1500, MaxCarbs = 3000
             };
 
             CalculateBasketCommand = new RelayCommand(_ => Calculate());
             SaveCommand = new RelayCommand(_ => SaveData());
             AddProductCommand = new RelayCommand(_ => AddProduct());
             DeleteProductCommand = new RelayCommand(_ => DeleteProduct());
+            
+            ExitCommand = new RelayCommand(_ => Environment.Exit(0));
+
+            UpdateStatus();
+        }
+
+        private void ApplyFilter()
+        {
+            FilteredProducts.Clear();
+            foreach (var product in Products)
+            {
+                // Якщо рядок пошуку порожній АБО назва продукту містить текст пошуку (незалежно від регістру)
+                if (string.IsNullOrWhiteSpace(SearchText) || 
+                    product.Name.Contains(SearchText, StringComparison.OrdinalIgnoreCase))
+                {
+                    FilteredProducts.Add(product);
+                }
+            }
         }
 
         private void Calculate()
         {
+            StatusMessage = "Проводиться розрахунок...";
             CalculationResult = _optimizationService.CalculateOptimalBasket(Products, UserConstraints);
+            UpdateStatus();
         }
 
         private void SaveData()
         {
-            try
+            var listToSave = new System.Collections.Generic.List<WeightProduct>();
+            foreach (var p in Products)
             {
-                var listToSave = new System.Collections.Generic.List<WeightProduct>();
-                foreach (var p in Products)
-                {
-                    if (p is WeightProduct wp) listToSave.Add(wp);
-                    else listToSave.Add(new WeightProduct { Name = p.Name, Price = p.Price, Calories = p.Calories, Proteins = p.Proteins, Fats = p.Fats, Carbs = p.Carbs, MinQuantity = p.MinQuantity, MaxQuantity = p.MaxQuantity });
-                }
-                
-                _dataManager.SaveProducts(listToSave);
-                CalculationResult = "База продуктів успішно збережена у файл!";
+                if (p is WeightProduct wp) listToSave.Add(wp);
+                else listToSave.Add(new WeightProduct { Name = p.Name, Price = p.Price, Calories = p.Calories, Proteins = p.Proteins, Fats = p.Fats, Carbs = p.Carbs, MinQuantity = p.MinQuantity, MaxQuantity = p.MaxQuantity });
             }
-            catch (Exception ex)
-            {
-                CalculationResult = $"Помилка збереження: {ex.Message}";
-            }
+            
+            _dataManager.SaveProducts(listToSave);
+            CalculationResult = "База продуктів успішно збережена у файл!";
+            UpdateStatus("Базу збережено!");
         }
 
         private void AddProduct()
         {
-            Products.Add(new WeightProduct { Name = "Новий продукт", MaxQuantity = 10 });
+            var newProd = new WeightProduct { Name = "Новий продукт", MaxQuantity = 10 };
+            Products.Add(newProd);
+            ApplyFilter(); // Оновлюємо таблицю
+            UpdateStatus();
         }
+
         private void DeleteProduct()
         {
             if (SelectedProduct != null)
             {
-                string deletedProductcName = SelectedProduct.Name;
+                string deletedName = SelectedProduct.Name;
                 Products.Remove(SelectedProduct);
-                CalculationResult = $"Продукт '{deletedProductcName}' видалено.";
+                ApplyFilter(); // Оновлюємо таблицю
+                CalculationResult = $"Продукт '{deletedName}' видалено.";
+                UpdateStatus();
             }
+        }
+
+        private void UpdateStatus(string customMessage = null)
+        {
+            if (customMessage != null)
+                StatusMessage = customMessage;
             else
-            {
-                CalculationResult = "Будь ласка, спочатку виділіть продукт у таблиці для видалення.";
-            }
+                StatusMessage = $"Готовий до роботи. Всього продуктів у базі: {Products.Count}";
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -128,7 +165,6 @@ namespace kcalCalculator.ViewModels
         }
     }
 
-    // Клас для команд
     public class RelayCommand : ICommand
     {
         private readonly Action<object> _execute;

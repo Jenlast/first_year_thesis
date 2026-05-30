@@ -19,7 +19,7 @@ namespace kcalCalculator.Models
                 if (constraints.MaxBudget < 0 || constraints.MinProteins < 0 || constraints.MaxProteins < 0 || 
                     constraints.MinFats < 0 || constraints.MaxFats < 0 || constraints.MinCarbs < 0 || constraints.MaxCarbs < 0)
                 {
-                    return "❌ ПОМИЛКА: Вимоги до кошика не можуть бути від'ємними!";
+                    return "ПОМИЛКА: Вимоги до кошика не можуть бути від'ємними!";
                 }
 
                 // Перевіряємо продукти (таблицю)
@@ -27,13 +27,13 @@ namespace kcalCalculator.Models
                 {
                     if (p.Price < 0 || p.Calories < 0 || p.Proteins < 0 || p.Fats < 0 || p.Carbs < 0 || p.MinQuantity < 0 || p.MaxQuantity < 0)
                     {
-                        return $"❌ ПОМИЛКА: Продукт '{p.Name}' містить від'ємні значення! Вартість, вага та БЖВ не можуть бути меншими за нуль.";
+                        return $"ПОМИЛКА: Продукт '{p.Name}' містить від'ємні значення! Вартість, вага та БЖВ не можуть бути меншими за нуль.";
                     }
                     
-                    // Бонус: перевірка, щоб мінімум не був більшим за максимум
+                    // Перевірка, щоб мінімум не був більшим за максимум
                     if (p.MinQuantity > p.MaxQuantity)
                     {
-                        return $"❌ ПОМИЛКА: У продукту '{p.Name}' мінімальна кількість більша за максимальну!";
+                        return $"ПОМИЛКА: У продукту '{p.Name}' мінімальна кількість більша за максимальну!";
                     }
                 }
 
@@ -48,7 +48,6 @@ namespace kcalCalculator.Models
                 Objective objective = solver.Objective();
                 objective.SetMinimization();
 
-                // ... ТУТ ЙДЕ ВЕСЬ ВАШ ПОПЕРЕДНІЙ КОД СТВОРЕННЯ ЗМІННИХ ...
                 foreach (var product in products)
                 {
                     Variable x = solver.MakeNumVar(product.MinQuantity, product.MaxQuantity, product.Name);
@@ -75,11 +74,10 @@ namespace kcalCalculator.Models
 
                 Solver.ResultStatus resultStatus = solver.Solve();
 
-                // ... ТУТ ЙДЕ ВАШ ОНОВЛЕНИЙ БЛОК ВИВОДУ РЕЗУЛЬТАТУ ...
                 if (resultStatus == Solver.ResultStatus.OPTIMAL)
                 {
                     StringBuilder sb = new StringBuilder();
-                    sb.AppendLine("🛍️ Сформований кошик:\n");
+                    sb.AppendLine("Сформований кошик:\n");
                     sb.AppendLine("Включає такі продукти:");
                     
                     double totalCost = 0;
@@ -116,13 +114,13 @@ namespace kcalCalculator.Models
                         }
                     }
                     
-                    sb.AppendLine("\n📊 Загальні показники на тиждень:");
+                    sb.AppendLine("\nЗагальні показники на тиждень:");
                     sb.AppendLine($"- Калорій: {Math.Round(totalCalories, 1)} ккал");
                     sb.AppendLine($"- Білків: {Math.Round(totalProteins, 1)} г");
                     sb.AppendLine($"- Жирів: {Math.Round(totalFats, 1)} г");
                     sb.AppendLine($"- Вуглеводів: {Math.Round(totalCarbs, 1)} г");
 
-                    sb.AppendLine($"\n💵 Загальна ціна: {Math.Round(totalCost, 2)} грн.");
+                    sb.AppendLine($"\nЗагальна ціна: {Math.Round(totalCost, 2)} грн.");
 
                     return sb.ToString();
                 }

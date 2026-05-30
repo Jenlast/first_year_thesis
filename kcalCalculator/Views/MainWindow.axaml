@@ -8,88 +8,114 @@
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
         Title="Калькулятор Оптимального Кошика"
-        Width="1500" Height="900">
+        Width="1200" Height="650">
 
-    <Window.KeyBindings>
-        <KeyBinding Gesture="Enter" Command="{Binding CalculateBasketCommand}"/>  
-    </Window.KeyBindings>
+    <!-- Використовуємо DockPanel як головний контейнер -->
+    <DockPanel>
+        
+        <!-- 1. ГОЛОВНЕ МЕНЮ (Верх) -->
+        <Menu DockPanel.Dock="Top" Background="#1e1e1e" Foreground="White">
+            <MenuItem Header="Файл">
+                <MenuItem Header="Відкрити базу..." />
+                <MenuItem Header="Зберегти базу як..." /> 
+                <Separator/>
+                <MenuItem Header="Вихід" Command="{Binding ExitCommand}"/>
+            </MenuItem>
+            <MenuItem Header="Довідка">
+                <MenuItem Header="Про застосунок" /> 
+            </MenuItem>
+        </Menu>
 
-    <Grid ColumnDefinitions="2*, 1*">
-        <!-- ЛІВА ЧАСТИНА: Таблиця продуктів -->
-        <DockPanel Grid.Column="0" Margin="10">
-            <TextBlock DockPanel.Dock="Top" Text="База продуктів (на 100г / 1 шт)" FontWeight="Bold" Margin="0,0,0,10"/>
+        <!-- 2. РЯДОК СТАНУ (Низ) -->
+        <Border DockPanel.Dock="Bottom" Background="#0078D7" Padding="10,5">
+            <TextBlock Text="{Binding StatusMessage}" Foreground="White" FontWeight="SemiBold"/>
+        </Border>
+
+        <!-- 3. ГОЛОВНА РОБОЧА ЗОНА -->
+        <Grid ColumnDefinitions="2*, 1*">
             
-            <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Spacing="10" Margin="0,10,0,0">
-                <Button Content="Додати продукт" Command="{Binding AddProductCommand}"/>
-                <Button Content="Видалити обраний" Command="{Binding DeleteProductCommand}" Background="#851F0D"/>
-                <Button Content="Зберегти базу" Command="{Binding SaveCommand}"/>
-                <TextBlock Text="* Редагуйте прямо в таблиці" VerticalAlignment="Center" Foreground="Gray"/>
-            </StackPanel>
-
-            <DataGrid ItemsSource="{Binding Products}" SelectedItem="{Binding SelectedProduct}" AutoGenerateColumns="False" CanUserReorderColumns="True" CanUserResizeColumns="True">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="Назва" Binding="{Binding Name}"/>
-                    <DataGridTextColumn Header="Ціна (грн)" Binding="{Binding Price}"/>
-                    <DataGridTextColumn Header="Ккал" Binding="{Binding Calories}"/>
-                    <DataGridTextColumn Header="Білки" Binding="{Binding Proteins}"/>
-                    <DataGridTextColumn Header="Жири" Binding="{Binding Fats}"/>
-                    <DataGridTextColumn Header="Вуглеводи" Binding="{Binding Carbs}"/>
-                    <DataGridTextColumn Header="Мін. к-сть" Binding="{Binding MinQuantity}"/>
-                    <DataGridTextColumn Header="Макс. к-сть" Binding="{Binding MaxQuantity}"/>
-                </DataGrid.Columns>
-            </DataGrid>
-        </DockPanel>
-
-        <!-- ПРАВА ЧАСТИНА: Обмеження та Розрахунок -->
-        <Border Grid.Column="1" Margin="10" Padding="10" Background="#2b2b2b" CornerRadius="5">
-            <!-- Змінено StackPanel на Grid, щоб нижнє текстове поле могло розтягуватися -->
-            <Grid RowDefinitions="Auto, *">
+            <!-- ЛІВА ЧАСТИНА: Таблиця продуктів -->
+            <DockPanel Grid.Column="0" Margin="10">
                 
-                <!-- Рядок 0: Всі налаштування та кнопка -->
-                <StackPanel Grid.Row="0" Spacing="10">
-                    <TextBlock Text="Вимоги до кошика (Вимога 2)" FontWeight="Bold" FontSize="16"/>
+                <StackPanel DockPanel.Dock="Top" Spacing="10" Margin="0,0,0,10">
+                    <TextBlock Text="База продуктів (на 100г / 1 шт)" FontWeight="Bold"/>
                     
-                    <TextBlock Text="Макс. бюджет (грн):"/>
-                    <TextBox Text="{Binding UserConstraints.MaxBudget}"/>
-
-                    <TextBlock Text="Білки (від - до):"/>
-                    <Grid ColumnDefinitions="*,10,*">
-                        <TextBox Grid.Column="0" Text="{Binding UserConstraints.MinProteins}"/>
-                        <TextBlock Grid.Column="1" Text="-" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        <TextBox Grid.Column="2" Text="{Binding UserConstraints.MaxProteins}"/>
-                    </Grid>
-
-                    <TextBlock Text="Жири (від - до):"/>
-                    <Grid ColumnDefinitions="*,10,*">
-                        <TextBox Grid.Column="0" Text="{Binding UserConstraints.MinFats}"/>
-                        <TextBlock Grid.Column="1" Text="-" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        <TextBox Grid.Column="2" Text="{Binding UserConstraints.MaxFats}"/>
-                    </Grid>
-
-                    <TextBlock Text="Вуглеводи (від - до):"/>
-                    <Grid ColumnDefinitions="*,10,*">
-                        <TextBox Grid.Column="0" Text="{Binding UserConstraints.MinCarbs}"/>
-                        <TextBlock Grid.Column="1" Text="-" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        <TextBox Grid.Column="2" Text="{Binding UserConstraints.MaxCarbs}"/>
-                    </Grid>
-
-                    <Button Content="РОЗРАХУВАТИ КОШИК" 
-                            Command="{Binding CalculateBasketCommand}" 
-                            HorizontalAlignment="Stretch" 
-                            HorizontalContentAlignment="Center"
-                            Background="#0078D7" Foreground="White" FontWeight="Bold" Margin="0,15,0,0"/>
-
-                    <TextBlock Text="Результат розрахунку:" FontWeight="Bold" Margin="0,10,0,0"/>
+                    <!-- ПОЛЕ ДЛЯ ФІЛЬТРАЦІЇ (ПОШУКУ) -->
+                    <TextBox Text="{Binding SearchText}" Watermark="🔍 Пошук за назвою..." />
+                </StackPanel>
+                
+                <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Spacing="10" Margin="0,10,0,0">
+                    <Button Content="Додати продукт" Command="{Binding AddProductCommand}" 
+                            ToolTip.Tip="Створює новий порожній рядок у таблиці"/>
+                    
+                    <Button Content="Видалити обраний" Command="{Binding DeleteProductCommand}" Background="#851F0D"
+                            ToolTip.Tip="Видаляє виділений продукт з бази"/>
+                    
+                    <Button Content="Зберегти базу" Command="{Binding SaveCommand}"
+                            ToolTip.Tip="Зберігає поточну таблицю у файл"/>
+                    
+                    <TextBlock Text="* Редагуйте прямо в таблиці" VerticalAlignment="Center" Foreground="Gray"/>
                 </StackPanel>
 
-                <!-- Рядок 1: Текстове поле результату (тепер воно займає весь вільний простір, що залишився) -->
-                <!-- Зверніть увагу: Height="200" видалено -->
-                <TextBox Grid.Row="1"
-                         Text="{Binding CalculationResult}" 
-                         AcceptsReturn="True" TextWrapping="Wrap" 
-                         IsReadOnly="True" 
-                         Margin="0,5,0,0" />
-            </Grid>
-        </Border>
-    </Grid>
+                <DataGrid ItemsSource="{Binding FilteredProducts}" SelectedItem="{Binding SelectedProduct}" 
+                          AutoGenerateColumns="False" CanUserReorderColumns="True" CanUserResizeColumns="True">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Назва" Binding="{Binding Name}"/>
+                        <DataGridTextColumn Header="Ціна (грн)" Binding="{Binding Price}"/>
+                        <DataGridTextColumn Header="Ккал" Binding="{Binding Calories}"/>
+                        <DataGridTextColumn Header="Білки" Binding="{Binding Proteins}"/>
+                        <DataGridTextColumn Header="Жири" Binding="{Binding Fats}"/>
+                        <DataGridTextColumn Header="Вуглеводи" Binding="{Binding Carbs}"/>
+                        <DataGridTextColumn Header="Мін. к-сть" Binding="{Binding MinQuantity}"/>
+                        <DataGridTextColumn Header="Макс. к-сть" Binding="{Binding MaxQuantity}"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </DockPanel>
+
+            <!-- ПРАВА ЧАСТИНА: Обмеження та Розрахунок -->
+            <Border Grid.Column="1" Margin="10" Padding="10" Background="#2b2b2b" CornerRadius="5">
+                <Grid RowDefinitions="Auto, *">
+                    <StackPanel Grid.Row="0" Spacing="10">
+                        <TextBlock Text="Вимоги до кошика (Вимога 2)" FontWeight="Bold" FontSize="16"/>
+                        
+                        <TextBlock Text="Макс. бюджет (грн):"/>
+                        <TextBox Text="{Binding UserConstraints.MaxBudget}"/>
+
+                        <TextBlock Text="Білки (від - до):"/>
+                        <Grid ColumnDefinitions="*,10,*">
+                            <TextBox Grid.Column="0" Text="{Binding UserConstraints.MinProteins}"/>
+                            <TextBlock Grid.Column="1" Text="-" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <TextBox Grid.Column="2" Text="{Binding UserConstraints.MaxProteins}"/>
+                        </Grid>
+
+                        <TextBlock Text="Жири (від - до):"/>
+                        <Grid ColumnDefinitions="*,10,*">
+                            <TextBox Grid.Column="0" Text="{Binding UserConstraints.MinFats}"/>
+                            <TextBlock Grid.Column="1" Text="-" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <TextBox Grid.Column="2" Text="{Binding UserConstraints.MaxFats}"/>
+                        </Grid>
+
+                        <TextBlock Text="Вуглеводи (від - до):"/>
+                        <Grid ColumnDefinitions="*,10,*">
+                            <TextBox Grid.Column="0" Text="{Binding UserConstraints.MinCarbs}"/>
+                            <TextBlock Grid.Column="1" Text="-" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <TextBox Grid.Column="2" Text="{Binding UserConstraints.MaxCarbs}"/>
+                        </Grid>
+
+                        <Button Content="РОЗРАХУВАТИ КОШИК" 
+                                Command="{Binding CalculateBasketCommand}" 
+                                HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                                Background="#0078D7" Foreground="White" FontWeight="Bold" Margin="0,15,0,0"
+                                ToolTip.Tip="Запускає математичну модель лінійного програмування"/>
+
+                        <TextBlock Text="Результат розрахунку:" FontWeight="Bold" Margin="0,10,0,0"/>
+                    </StackPanel>
+
+                    <TextBox Grid.Row="1" Text="{Binding CalculationResult}" 
+                             AcceptsReturn="True" TextWrapping="Wrap" 
+                             IsReadOnly="True" Margin="0,5,0,0" />
+                </Grid>
+            </Border>
+        </Grid>
+    </DockPanel>
 </Window>
