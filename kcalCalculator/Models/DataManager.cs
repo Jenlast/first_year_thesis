@@ -6,21 +6,19 @@ namespace kcalCalculator.Models
 {
     public class DataManager
     {
-        private readonly string _filePath = "products_db.json";
-
-        public void SaveProducts(List<WeightProduct> products)
+        public void SaveProducts(string filePath, IEnumerable<BaseProduct> products)
         {
             var options = new JsonSerializerOptions { WriteIndented = true };
             string json = JsonSerializer.Serialize(products, options);
-            File.WriteAllText(_filePath, json);
+            File.WriteAllText(filePath, json);
         }
 
-        public List<WeightProduct> LoadProducts()
+        public List<BaseProduct> LoadProducts(string filePath)
         {
-            if (!File.Exists(_filePath)) return new List<WeightProduct>();
+            if (!File.Exists(filePath)) return new List<BaseProduct>();
 
-            string json = File.ReadAllText(_filePath);
-            return JsonSerializer.Deserialize<List<WeightProduct>>(json) ?? new List<WeightProduct>();
+            string json = File.ReadAllText(filePath);
+            return JsonSerializer.Deserialize<List<BaseProduct>>(json) ?? new List<BaseProduct>();
         }
     }
 }

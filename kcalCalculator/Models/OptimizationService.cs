@@ -55,15 +55,15 @@ namespace kcalCalculator.Models
                     objective.SetCoefficient(x, product.Calories);
                 }
 
-                Constraint budgetConstraint = solver.MakeConstraint(0, constraints.MaxBudget, "Budget");
+                Constraint budgetConstraint = solver.MakeConstraint(0, (double)constraints.MaxBudget, "Budget");
                 foreach (var product in products)
                 {
                     budgetConstraint.SetCoefficient(variables[product], product.Price);
                 }
 
-                Constraint proteinConstraint = solver.MakeConstraint(constraints.MinProteins, constraints.MaxProteins, "Proteins");
-                Constraint fatConstraint = solver.MakeConstraint(constraints.MinFats, constraints.MaxFats, "Fats");
-                Constraint carbConstraint = solver.MakeConstraint(constraints.MinCarbs, constraints.MaxCarbs, "Carbs");
+                Constraint proteinConstraint = solver.MakeConstraint((double)constraints.MinProteins, (double)constraints.MaxProteins, "Proteins");
+                Constraint fatConstraint = solver.MakeConstraint((double)constraints.MinFats, (double)constraints.MaxFats, "Fats");
+                Constraint carbConstraint = solver.MakeConstraint((double)constraints.MinCarbs, (double)constraints.MaxCarbs, "Carbs");
 
                 foreach (var product in products)
                 {
