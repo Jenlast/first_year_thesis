@@ -14,24 +14,21 @@ namespace kcalCalculator.Models
                 // ==========================================
                 // 1. БЛОК ВАЛІДАЦІЇ ДАНИХ (Перевірка на мінуси)
                 // ==========================================
-                
-                // Перевіряємо вимоги (праву панель)
                 if (constraints.MaxBudget < 0 || constraints.MinProteins < 0 || constraints.MaxProteins < 0 || 
                     constraints.MinFats < 0 || constraints.MaxFats < 0 || constraints.MinCarbs < 0 || constraints.MaxCarbs < 0)
                 {
                     return "ПОМИЛКА: Вимоги до кошика не можуть бути від'ємними!";
                 }
 
-                // Перевіряємо продукти (таблицю)
                 foreach (var p in products)
                 {
                     if (p.Price < 0 || p.Calories < 0 || p.Proteins < 0 || p.Fats < 0 || p.Carbs < 0 || p.MinQuantity < 0 || p.MaxQuantity < 0)
                     {
-                        return $"ПОМИЛКА: Продукт '{p.Name}' містить від'ємні значення! Вартість, вага та БЖВ не можуть бути меншими за нуль.";
+                        return $"ПОМИЛКА: Продукт '{p.Name}' містить від'ємні значення!";
                     }
-                    
-                    // Перевірка, щоб мінімум не був більшим за максимум
-                    if (p.MinQuantity > p.MaxQuantity)
+                    // Визначаємо реальний мінімум: якщо галочка стоїть - беремо з таблиці, якщо ні - беремо 0
+                    double actualMin = p.IsMandatory ? p.MinQuantity : 0;
+                    if (actualMin > p.MaxQuantity)
                     {
                         return $"ПОМИЛКА: У продукту '{p.Name}' мінімальна кількість більша за максимальну!";
                     }
@@ -40,7 +37,6 @@ namespace kcalCalculator.Models
                 // ==========================================
                 // 2. БЛОК РОЗРАХУНКУ (Лінійне програмування)
                 // ==========================================
-                
                 Solver solver = Solver.CreateSolver("GLOP");
                 if (solver == null) return "Помилка ініціалізації розв'язувача.";
 
@@ -50,20 +46,24 @@ namespace kcalCalculator.Models
 
                 foreach (var product in products)
                 {
-                    Variable x = solver.MakeNumVar(product.MinQuantity, product.MaxQuantity, product.Name);
+                    // Якщо галочка стоїть - змушуємо брати мінімум. Якщо не стоїть - дозволяємо алгоритму брати від 0
+                    double actualMin = product.IsMandatory ? product.MinQuantity : 0;
+                    Variable x = solver.MakeNumVar(actualMin, product.MaxQuantity, product.Name);
                     variables.Add(product, x);
-                    objective.SetCoefficient(x, product.Calories);
+                    objective.SetCoefficient(x, product.Calories); // Ціль - мінімум калорій
                 }
 
+                // БЮДЖЕТ (Він у нас на ТИЖДЕНЬ, тому залишаємо як є)
                 Constraint budgetConstraint = solver.MakeConstraint(0, (double)constraints.MaxBudget, "Budget");
                 foreach (var product in products)
                 {
                     budgetConstraint.SetCoefficient(variables[product], product.Price);
                 }
 
-                Constraint proteinConstraint = solver.MakeConstraint((double)constraints.MinProteins, (double)constraints.MaxProteins, "Proteins");
-                Constraint fatConstraint = solver.MakeConstraint((double)constraints.MinFats, (double)constraints.MaxFats, "Fats");
-                Constraint carbConstraint = solver.MakeConstraint((double)constraints.MinCarbs, (double)constraints.MaxCarbs, "Carbs");
+                // БЖВ (Вони у нас НА ДЕНЬ, тому обов'язково МНОЖИМО НА 7 для тижневого кошика!)
+                Constraint proteinConstraint = solver.MakeConstraint((double)constraints.MinProteins * 7, (double)constraints.MaxProteins * 7, "Proteins");
+                Constraint fatConstraint = solver.MakeConstraint((double)constraints.MinFats * 7, (double)constraints.MaxFats * 7, "Fats");
+                Constraint carbConstraint = solver.MakeConstraint((double)constraints.MinCarbs * 7, (double)constraints.MaxCarbs * 7, "Carbs");
 
                 foreach (var product in products)
                 {
@@ -74,6 +74,9 @@ namespace kcalCalculator.Models
 
                 Solver.ResultStatus resultStatus = solver.Solve();
 
+                // ==========================================
+                // 3. ФОРМУВАННЯ РЕЗУЛЬТАТУ
+                // ==========================================
                 if (resultStatus == Solver.ResultStatus.OPTIMAL)
                 {
                     StringBuilder sb = new StringBuilder();
@@ -100,12 +103,14 @@ namespace kcalCalculator.Models
                             double displayQuantity = quantity;
                             string unit = "од/тижд";
 
-                            if (product is WeightProduct)
+                            // Якщо це ваговий продукт, показуємо в грамах (множимо на 100)
+                            if (product.GetType().Name == "WeightProduct")
                             {
                                 displayQuantity = quantity * 100;
                                 unit = "г/тижд";
                             }
-                            else if (product is UnitProduct)
+                            // Якщо поштучний - залишаємо як є
+                            else if (product.GetType().Name == "UnitProduct")
                             {
                                 unit = "шт/тижд";
                             }
@@ -114,7 +119,7 @@ namespace kcalCalculator.Models
                         }
                     }
                     
-                    sb.AppendLine("\nЗагальні показники на тиждень:");
+                    sb.AppendLine("\nЗагальні показники на ТИЖДЕНЬ:");
                     sb.AppendLine($"- Калорій: {Math.Round(totalCalories, 1)} ккал");
                     sb.AppendLine($"- Білків: {Math.Round(totalProteins, 1)} г");
                     sb.AppendLine($"- Жирів: {Math.Round(totalFats, 1)} г");

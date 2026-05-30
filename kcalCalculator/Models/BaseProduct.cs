@@ -11,6 +11,9 @@ namespace kcalCalculator.Models
     {
         public string Id { get; set; } = Guid.NewGuid().ToString();
 
+        private bool _isMandatory;
+        public bool IsMandatory { get => _isMandatory; set { if (_isMandatory == value) return; _isMandatory = value; OnPropertyChanged(); } }
+
         private string _name = string.Empty;
         public string Name { get => _name; set { if (_name == value) return; _name = value; OnPropertyChanged(); } }
 
@@ -36,6 +39,7 @@ namespace kcalCalculator.Models
         public double MaxQuantity { get => _maxQuantity; set { if (_maxQuantity == value) return; _maxQuantity = value; OnPropertyChanged(); } }
 
         public abstract string GetProductType();
+        public abstract string MeasurementType { get; }
 
         public event PropertyChangedEventHandler? PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
