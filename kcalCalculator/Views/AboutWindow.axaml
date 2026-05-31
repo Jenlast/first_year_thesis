@@ -18,10 +18,13 @@
                        FontSize="14" HorizontalAlignment="Center" Foreground="Gray" Margin="0,-10,0,10"/>
 
             <Border CornerRadius="100" ClipToBounds="True" Width="120" Height="120" 
-                    BorderBrush="#0078D7" BorderThickness="2" Background="White">
+                    BorderBrush="#000000" BorderThickness="2" Background="White">
                 <Image Source="/Assets/DSC_9293.JPG" Stretch="UniformToFill">
                     <Image.RenderTransform>
-                        <RotateTransform Angle="-90"/>
+                        <TransformGroup>
+                            <RotateTransform Angle="-90"/>
+                            <ScaleTransform ScaleX="1.3" ScaleY="1.3"/>
+                        </TransformGroup>
                     </Image.RenderTransform>
                 </Image>
             </Border>
