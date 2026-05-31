@@ -8,6 +8,9 @@ namespace kcalCalculator.Models
         private decimal _maxBudget;
         public decimal MaxBudget { get => _maxBudget; set { if (_maxBudget == value) return; _maxBudget = value; OnPropertyChanged(); } }
 
+        private decimal _minCalories;
+        public decimal MinCalories { get => _minCalories; set { if (_minCalories == value) return; _minCalories = value; OnPropertyChanged(); } }
+
         private decimal _minProteins;
         public decimal MinProteins { get => _minProteins; set { if (_minProteins == value) return; _minProteins = value; OnPropertyChanged(); } }
 

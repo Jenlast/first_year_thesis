@@ -8,7 +8,7 @@
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/icons8-корзина-64.png"
         Title="Калькулятор Оптимального Кошика"
-        Width="1550" Height="650">
+        Width="1550" Height="850">
 
     <DockPanel>
         
@@ -72,6 +72,9 @@
                         
                         <TextBlock Text="Макс. бюджет на тиждень (грн):" Margin="0,5,0,0"/>
                         <NumericUpDown Value="{Binding UserConstraints.MaxBudget}" Minimum="0" FormatString="0.##"/>
+
+                        <TextBlock Text="Мін. калорії на день (ккал):" Margin="0,5,0,0"/>
+                        <NumericUpDown Value="{Binding UserConstraints.MinCalories}" Minimum="0" FormatString="0.##"/>
 
                         <TextBlock Text="Білки на день (від - до):" Margin="0,5,0,0"/>
                         <Grid ColumnDefinitions="*,15,*">
