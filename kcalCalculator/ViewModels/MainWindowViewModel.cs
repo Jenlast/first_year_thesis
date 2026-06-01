@@ -8,6 +8,11 @@ using kcalCalculator.Models;
 
 namespace kcalCalculator.ViewModels
 {
+
+    // <summary>
+    // Головна модель представлення (ViewModel). 
+    // Виступає посередником між графічним інтерфейсом та математичною бізнес-логікою.
+    // </summary>
     public class MainWindowViewModel : INotifyPropertyChanged
     {
         private readonly DataManager _dataManager;
@@ -56,6 +61,9 @@ namespace kcalCalculator.ViewModels
         public ICommand DeleteProductCommand { get; }
         public ICommand ExitCommand { get; } 
 
+        // <summary>
+        // Конструктор. Ініціалізує початкові дані, завантажує базу з файлу та прив'язує команди.
+        // </summary>
         public MainWindowViewModel()
         {
             _dataManager = new DataManager();
@@ -101,6 +109,9 @@ namespace kcalCalculator.ViewModels
             UpdateStatus();
         }
 
+        // <summary>
+        // Метод для фільтрації бази продуктів за введеним текстом (пошук).
+        // </summary>
         private void ApplyFilter()
         {
             FilteredProducts.Clear();
@@ -114,13 +125,19 @@ namespace kcalCalculator.ViewModels
             }
         }
 
+        // <summary>
+        // Метод, що викликає математичну оптимізацію та оновлює текстове поле результату.
+        // </summary>
         private void Calculate()
         {
             StatusMessage = "Проводиться розрахунок...";
             CalculationResult = _optimizationService.CalculateOptimalBasket(Products, UserConstraints);
             UpdateStatus();
         }
-
+        
+        // <summary>
+        // Додає новий ваговий продукт до бази та оновлює таблицю.
+        // </summary>
         private void AddWeightProduct()
         {
             var newProd = new WeightProduct { Name = "Новий продукт (ваговий)", MaxQuantity = 10 };
@@ -129,6 +146,9 @@ namespace kcalCalculator.ViewModels
             UpdateStatus();
         }
 
+        // <summary>
+        // Додає новий поштучний продукт до бази та оновлює таблицю.
+        // </summary>
         private void AddUnitProduct()
         {
             var newProd = new UnitProduct { Name = "Новий продукт (штучний)", MaxQuantity = 10 };
@@ -137,6 +157,9 @@ namespace kcalCalculator.ViewModels
             UpdateStatus();
         }
 
+        // <summary>
+        // Видаляє виділений користувачем продукт із бази.
+        // </summary>
         private void DeleteProduct()
         {
             if (SelectedProduct != null)
@@ -149,6 +172,10 @@ namespace kcalCalculator.ViewModels
             }
         }
 
+        // <summary>
+        // Завантажує базу продуктів із вибраного файлу JSON.
+        // </summary>
+        // <param name="filePath">Шлях до файлу бази даних.</param>
         public void LoadDatabase(string filePath)
         {
             try
@@ -167,6 +194,10 @@ namespace kcalCalculator.ViewModels
             }
         }
 
+        // <summary>
+        // Зберігає поточну базу продуктів у вказаний файл JSON.
+        // </summary>
+        // <param name="filePath">Шлях для збереження файлу.</param>
         public void SaveDatabase(string filePath)
         {
             try
@@ -181,6 +212,9 @@ namespace kcalCalculator.ViewModels
             }
         }
 
+        // <summary>
+        // Оновлює інформацію у рядку стану (Status Bar) внизу вікна.
+        // </summary>
         private void UpdateStatus(string? customMessage = null)
         {
             if (customMessage != null)
@@ -196,6 +230,10 @@ namespace kcalCalculator.ViewModels
         }
     }
 
+    // <summary>
+    // Клас-обгортка для реалізації патерну ICommand.
+    // Дозволяє прив'язувати методи ViewModel до кнопок графічного інтерфейсу.
+    // </summary>
     public class RelayCommand : ICommand
     {
         private readonly Action<object?> _execute;

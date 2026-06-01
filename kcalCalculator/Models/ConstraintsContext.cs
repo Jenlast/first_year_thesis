@@ -3,6 +3,11 @@ using System.Runtime.CompilerServices;
 
 namespace kcalCalculator.Models
 {
+
+    // <summary>
+    // Клас, що зберігає користувацькі обмеження (бюджет, калорії, БЖВ).
+    // Відповідає за зберігання цільових параметрів для математичної моделі.
+    // </summary>
     public class ConstraintsContext : INotifyPropertyChanged
     {
         private decimal _maxBudget;

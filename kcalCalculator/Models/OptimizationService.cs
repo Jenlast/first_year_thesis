@@ -5,8 +5,21 @@ using Google.OrTools.LinearSolver;
 
 namespace kcalCalculator.Models
 {
+
+    // <summary>
+    // Клас-сервіс, що містить математичну модель оптимізації.
+    // Відповідає за перетворення об'єктів у задачу лінійного програмування та її розв'язання.
+    // </summary>
     public class OptimizationService
     {
+
+        // <summary>
+        // Головний алгоритм застосунку. Валідує дані, ініціалізує лінійний розв'язувач (GLOP), 
+        // задає цільову функцію мінімізації та повертає текстовий результат.
+        // </summary>
+        // <param name="products">База доступних продуктів.</param>
+        // <param name="constraints">Вимоги користувача до бюджету та нутрієнтів.</param>
+        // <returns>Текстовий звіт про сформований кошик або повідомлення про помилку.</returns>
         public string CalculateOptimalBasket(IEnumerable<BaseProduct> products, ConstraintsContext constraints)
         {
             try

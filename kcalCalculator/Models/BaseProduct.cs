@@ -5,6 +5,10 @@ using System.Text.Json.Serialization;
 
 namespace kcalCalculator.Models
 {
+    // <summary>
+    // Абстрактний базовий клас, що представляє загальні характеристики будь-якого харчового продукту.
+    // Демонструє принцип інкапсуляції (приватні поля з перевіркою) та є основою для поліморфізму.
+    // </summary>
     [JsonDerivedType(typeof(WeightProduct), typeDiscriminator: "weight")]
     [JsonDerivedType(typeof(UnitProduct), typeDiscriminator: "unit")]
     public abstract class BaseProduct : INotifyPropertyChanged
@@ -38,10 +42,23 @@ namespace kcalCalculator.Models
         private double _maxQuantity = 1000;
         public double MaxQuantity { get => _maxQuantity; set { if (_maxQuantity == value) return; _maxQuantity = value; OnPropertyChanged(); } }
 
+        // <summary>
+        /// Абстрактний метод для отримання типу продукту (ваговий чи поштучний).
+        /// </summary>
+        /// <returns>Рядок з назвою типу продукту.</returns>
         public abstract string GetProductType();
+
+        // <summary>
+        // Абстрактна властивість, що повертає одиницю виміру продукту.
+        // Реалізується в дочірніх класах (поліморфізм).
+        // </summary>
         public abstract string MeasurementType { get; }
 
         public event PropertyChangedEventHandler? PropertyChanged;
+
+        // <summary>
+        /// Метод для сповіщення графічного інтерфейсу про зміну значення властивості.
+        /// </summary>
         protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
