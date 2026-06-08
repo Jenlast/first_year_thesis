@@ -35,7 +35,7 @@ namespace kcalCalculator.Models
 
                 foreach (var p in products)
                 {
-                    if (constraints.MaxBudget < 0 || constraints.MinCalories < 0 || constraints.MinProteins < 0 || constraints.MaxProteins < 0 || 
+                    if (constraints.MaxBudget < 0 || constraints.MinProteins < 0 || constraints.MaxProteins < 0 || 
                     constraints.MinFats < 0 || constraints.MaxFats < 0 || constraints.MinCarbs < 0 || constraints.MaxCarbs < 0)
                     {
                         return $"ПОМИЛКА: Продукт '{p.Name}' містить від'ємні значення!";
@@ -78,13 +78,6 @@ namespace kcalCalculator.Models
                 Constraint proteinConstraint = solver.MakeConstraint((double)constraints.MinProteins * 7, (double)constraints.MaxProteins * 7, "Proteins");
                 Constraint fatConstraint = solver.MakeConstraint((double)constraints.MinFats * 7, (double)constraints.MaxFats * 7, "Fats");
                 Constraint carbConstraint = solver.MakeConstraint((double)constraints.MinCarbs * 7, (double)constraints.MaxCarbs * 7, "Carbs");
-                
-                // ОБМЕЖЕННЯ МІНІМУМУ КАЛОРІЙ (Множимо на 7 днів)
-                Constraint calorieConstraint = solver.MakeConstraint((double)constraints.MinCalories * 7, double.PositiveInfinity, "MinCalories");
-                foreach (var product in products)
-                {
-                    calorieConstraint.SetCoefficient(variables[product], product.Calories);
-                }
 
                 foreach (var product in products)
                 {

@@ -16,5 +16,19 @@ namespace kcalCalculator.Models
         // Перевизначена властивість одиниці виміру. Для поштучних продуктів це 1 шт.
         // </summary>
         public override string MeasurementType => "1 шт";
+
+        public override double DisplayMinQuantity 
+        { 
+            get => MinQuantity; 
+            set => MinQuantity = value; 
+        }
+
+        public override double DisplayMaxQuantity 
+        { 
+            get => MaxQuantity; 
+            set => MaxQuantity = value; 
+        }
+
+        public override string UnitName => "шт";
     }
 }

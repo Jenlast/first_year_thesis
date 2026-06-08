@@ -94,7 +94,6 @@ namespace kcalCalculator.ViewModels
             UserConstraints = new ConstraintsContext
             {
                 MaxBudget = 10000m,
-                MinCalories = 2000m,
                 MinProteins = 140m, MaxProteins = 280m,
                 MinFats = 50m, MaxFats = 140m,
                 MinCarbs = 250m, MaxCarbs = 450m

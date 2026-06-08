@@ -37,10 +37,39 @@ namespace kcalCalculator.Models
         public double Carbs { get => _carbs; set { if (_carbs == value) return; _carbs = value; OnPropertyChanged(); } }
 
         private double _minQuantity = 0;
-        public double MinQuantity { get => _minQuantity; set { if (_minQuantity == value) return; _minQuantity = value; OnPropertyChanged(); } }
+        public double MinQuantity 
+        { 
+            get => _minQuantity; 
+            set 
+            { 
+                if (_minQuantity == value) return; 
+                _minQuantity = value; 
+                OnPropertyChanged(); 
+                OnPropertyChanged(nameof(DisplayMinQuantity));
+            } 
+        }
 
         private double _maxQuantity = 1000;
-        public double MaxQuantity { get => _maxQuantity; set { if (_maxQuantity == value) return; _maxQuantity = value; OnPropertyChanged(); } }
+        public double MaxQuantity 
+        { 
+            get => _maxQuantity; 
+            set 
+            { 
+                if (_maxQuantity == value) return; 
+                _maxQuantity = value; 
+                OnPropertyChanged(); 
+                OnPropertyChanged(nameof(DisplayMaxQuantity));
+            } 
+        }
+
+        [JsonIgnore]
+        public abstract double DisplayMinQuantity { get; set; }
+
+        [JsonIgnore]
+        public abstract double DisplayMaxQuantity { get; set; }
+
+        [JsonIgnore]
+        public abstract string UnitName { get; }
 
         // <summary>
         /// Абстрактний метод для отримання типу продукту (ваговий чи поштучний).
