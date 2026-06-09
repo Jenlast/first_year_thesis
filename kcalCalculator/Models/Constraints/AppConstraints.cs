@@ -1,19 +1,19 @@
 using System.Collections.Generic;
 using Google.OrTools.LinearSolver;
 
-namespace kcalCalculator.Models
+namespace kcalCalculator.Models.Constraints
 {
     /// <summary>
     /// Абстрактний базовий клас для всіх математичних обмежень.
     /// Демонструє поліморфізм: кожен нащадок сам вирішує, який коефіцієнт (БЖВ чи ціну) передати в алгоритм.
     /// </summary>
-    public abstract class BaseAppConstraint
+    public abstract class AppConstraints
     {
         protected double MinBound { get; }
         protected double MaxBound { get; }
         protected string Name { get; }
 
-        protected BaseAppConstraint(double minBound, double maxBound, string name)
+        protected AppConstraints(double minBound, double maxBound, string name)
         {
             MinBound = minBound;
             MaxBound = maxBound;

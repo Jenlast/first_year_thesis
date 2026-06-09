@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Google.OrTools.LinearSolver;
+using kcalCalculator.Models.Constraints;
 
 namespace kcalCalculator.Models
 {
@@ -66,12 +67,12 @@ namespace kcalCalculator.Models
                 // Застосування обмежень (Поліморфізм у дії)
                 
                 // 1. Створюємо список абстрактних обмежень, наповнюючи його конкретними класами-нащадками
-                var appConstraints = new List<BaseAppConstraint>
+                var appConstraints = new List<AppConstraints>
                 {
                     new BudgetConstraint((double)constraints.MaxBudget),
                     new ProteinConstraint((double)constraints.MinProteins, (double)constraints.MaxProteins),
                     new FatConstraint((double)constraints.MinFats, (double)constraints.MaxFats),
-                    new CarbConstraint((double)constraints.MinCarbs, (double)constraints.MaxCarbs),
+                    new CarbConstraint((double)constraints.MinCarbs, (double)constraints.MaxCarbs)
                 };
 
                 // 2. Поліморфний виклик: програма не знає, який саме це клас, вона просто викликає ApplyToSolver,
