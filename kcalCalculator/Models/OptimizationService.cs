@@ -24,9 +24,7 @@ namespace kcalCalculator.Models
         {
             try
             {
-                // ==========================================
-                // 1. БЛОК ВАЛІДАЦІЇ ДАНИХ (Перевірка на мінуси)
-                // ==========================================
+                // 1. Блок валідації даних (Перевірка на мінуси)
                 if (constraints.MaxBudget < 0 || constraints.MinProteins < 0 || constraints.MaxProteins < 0 || 
                     constraints.MinFats < 0 || constraints.MaxFats < 0 || constraints.MinCarbs < 0 || constraints.MaxCarbs < 0)
                 {
@@ -48,9 +46,7 @@ namespace kcalCalculator.Models
                     }
                 }
 
-                // ==========================================
-                // 2. БЛОК РОЗРАХУНКУ (Лінійне програмування)
-                // ==========================================
+                // 2. Блок розрахунку (Лінійне програмування)
                 Solver solver = Solver.CreateSolver("GLOP");
                 if (solver == null) return "Помилка ініціалізації розв'язувача.";
 
@@ -67,30 +63,27 @@ namespace kcalCalculator.Models
                     objective.SetCoefficient(x, product.Calories); // Ціль - мінімум калорій
                 }
 
-                // БЮДЖЕТ (Він у нас на ТИЖДЕНЬ, тому залишаємо як є)
-                Constraint budgetConstraint = solver.MakeConstraint(0, (double)constraints.MaxBudget, "Budget");
-                foreach (var product in products)
+                // Застосування обмежень (Поліморфізм у дії)
+                
+                // 1. Створюємо список абстрактних обмежень, наповнюючи його конкретними класами-нащадками
+                var appConstraints = new List<BaseAppConstraint>
                 {
-                    budgetConstraint.SetCoefficient(variables[product], product.Price);
-                }
+                    new BudgetConstraint((double)constraints.MaxBudget),
+                    new ProteinConstraint((double)constraints.MinProteins, (double)constraints.MaxProteins),
+                    new FatConstraint((double)constraints.MinFats, (double)constraints.MaxFats),
+                    new CarbConstraint((double)constraints.MinCarbs, (double)constraints.MaxCarbs),
+                };
 
-                // БЖВ (Вони у нас НА ДЕНЬ, тому обов'язково МНОЖИМО НА 7 для тижневого кошика!)
-                Constraint proteinConstraint = solver.MakeConstraint((double)constraints.MinProteins * 7, (double)constraints.MaxProteins * 7, "Proteins");
-                Constraint fatConstraint = solver.MakeConstraint((double)constraints.MinFats * 7, (double)constraints.MaxFats * 7, "Fats");
-                Constraint carbConstraint = solver.MakeConstraint((double)constraints.MinCarbs * 7, (double)constraints.MaxCarbs * 7, "Carbs");
-
-                foreach (var product in products)
+                // 2. Поліморфний виклик: програма не знає, який саме це клас, вона просто викликає ApplyToSolver,
+                // а кожен об'єкт сам знає, як правильно додати свої коефіцієнти в задачу!
+                foreach (var appConstraint in appConstraints)
                 {
-                    proteinConstraint.SetCoefficient(variables[product], product.Proteins);
-                    fatConstraint.SetCoefficient(variables[product], product.Fats);
-                    carbConstraint.SetCoefficient(variables[product], product.Carbs);
+                    appConstraint.ApplyToSolver(solver, variables);
                 }
 
                 Solver.ResultStatus resultStatus = solver.Solve();
 
-                // ==========================================
-                // 3. ФОРМУВАННЯ РЕЗУЛЬТАТУ
-                // ==========================================
+                // 3. Формування результату
                 if (resultStatus == Solver.ResultStatus.OPTIMAL)
                 {
                     StringBuilder sb = new StringBuilder();
