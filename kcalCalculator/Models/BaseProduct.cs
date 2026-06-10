@@ -22,19 +22,69 @@ namespace kcalCalculator.Models
         public string Name { get => _name; set { if (_name == value) return; _name = value; OnPropertyChanged(); } }
 
         private double _price;
-        public double Price { get => _price; set { if (_price == value) return; _price = value; OnPropertyChanged(); } }
+        public double Price 
+        { 
+            get => _price; 
+            set 
+            {
+                if (value < 0) value = 0;
+                if (_price == value) return; 
+                _price = value; 
+                OnPropertyChanged(); 
+            } 
+        }
 
         private double _calories;
-        public double Calories { get => _calories; set { if (_calories == value) return; _calories = value; OnPropertyChanged(); } }
+        public double Calories
+        { 
+            get => _calories; 
+            set 
+            {
+                if (value < 0) value = 0;
+                if (_calories == value) return; 
+                _calories = value; 
+                OnPropertyChanged(); 
+            } 
+        }
 
         private double _proteins;
-        public double Proteins { get => _proteins; set { if (_proteins == value) return; _proteins = value; OnPropertyChanged(); } }
+        public double Proteins
+        { 
+            get => _proteins; 
+            set 
+            {
+                if (value < 0) value = 0;
+                if (_proteins == value) return; 
+                _proteins = value; 
+                OnPropertyChanged(); 
+            } 
+        }
 
         private double _fats;
-        public double Fats { get => _fats; set { if (_fats == value) return; _fats = value; OnPropertyChanged(); } }
+        public double Fats
+        { 
+            get => _fats; 
+            set 
+            {
+                if (value < 0) value = 0;
+                if (_fats == value) return; 
+                _fats = value; 
+                OnPropertyChanged(); 
+            } 
+        }
 
         private double _carbs;
-        public double Carbs { get => _carbs; set { if (_carbs == value) return; _carbs = value; OnPropertyChanged(); } }
+        public double Carbs
+        { 
+            get => _carbs; 
+            set 
+            {
+                if (value < 0) value = 0;
+                if (_carbs == value) return; 
+                _carbs = value; 
+                OnPropertyChanged(); 
+            } 
+        }
 
         private double _minQuantity = 0;
         public double MinQuantity 
@@ -42,6 +92,7 @@ namespace kcalCalculator.Models
             get => _minQuantity; 
             set 
             { 
+                if (value < 0) value = 0;
                 if (_minQuantity == value) return; 
                 _minQuantity = value; 
                 OnPropertyChanged(); 
@@ -55,6 +106,7 @@ namespace kcalCalculator.Models
             get => _maxQuantity; 
             set 
             { 
+                if (value < 0) value = 0;
                 if (_maxQuantity == value) return; 
                 _maxQuantity = value; 
                 OnPropertyChanged(); 
