@@ -84,8 +84,8 @@ namespace kcalCalculator.ViewModels
             // Якщо база порожня, додаємо стандартні
             if (Products.Count == 0)
             {
-                Products.Add(new WeightProduct { Name = "Гречка", Price = 7.5, Calories = 330, Proteins = 12.6, Fats = 3.3, Carbs = 62, MinQuantity = 1, MaxQuantity = 10 });
-                Products.Add(new WeightProduct { Name = "Куряче філе", Price = 21.5, Calories = 110, Proteins = 23, Fats = 1.5, Carbs = 0, MinQuantity = 1, MaxQuantity = 10 });
+                Products.Add(new WeightProduct { Name = "Гречка", Price = 7.5, Calories = 330, Proteins = 12.6, Fats = 3.3, Carbs = 62, MinQuantity = 10, MaxQuantity = 50 });
+                Products.Add(new WeightProduct { Name = "Куряче філе", Price = 21.5, Calories = 110, Proteins = 23, Fats = 1.5, Carbs = 0, MinQuantity = 10, MaxQuantity = 50 });
                 Products.Add(new UnitProduct { Name = "Яйця (1шт)", Price = 5.4, Calories = 75, Proteins = 6, Fats = 5, Carbs = 0.5, MinQuantity = 15, MaxQuantity = 40 });
             }
 
